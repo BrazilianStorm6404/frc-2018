@@ -10,6 +10,7 @@ package org.usfirst.frc.team6404.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -20,31 +21,36 @@ public class Robot extends IterativeRobot {
 	Controle control;
 	int counter = 0;
 	Integer[] vars = new Integer[5];
+	private PWMSpeedController tracao1,tracao2,tracao3,tracao4, subidaEsq, subidaDir ,roleteEsq, roleteDir;
+	private DigitalInput limit;
+	private Encoder encoderSubida, encoderTracao;
+	private ADXRS450_Gyro gyroscope;
 	boolean finalComandAndar, finalComandVirar, gambi, entregar = true;
+	private double subida;
 	@Override
 	public void robotInit() {
+		tracao1 = new Spark(0);
+		tracao2 = new Spark(1);
+		tracao3 = new Spark(2);
+		tracao4 = new Spark(3);
+		subidaEsq = new Spark(4);
+		subidaDir = new Spark(5);
+		roleteDir = new VictorSP(7);
+		roleteEsq = new Jaguar(8);
+		limit = new DigitalInput(7);
+		encoderSubida = new Encoder(0,1);
+		encoderTracao = new Encoder(1,2);
+		gyroscope = new ADXRS450_Gyro();
+
 	}
 
 	/**
 	 * This function is run once each time the robot enters autonomous mode.
 	 */
-	Encoder enc;
-	ADXRS450_Gyro giro;
-	PWMSpeedController motor0, motor1, motor2, motor3, motor4, motor5, motor6;
-	protected DigitalInput limit1, limit2;
 	Movimentar mov;
 	@Override
 	public void autonomousInit() {
-		enc = new Encoder(1, 0, true, EncodingType.k4X);
-		giro = new ADXRS450_Gyro();
-		motor0 = new Spark(0);
-		motor1 = new Spark(1);
-		motor2 = new Spark(2);
-		motor3 = new Spark(3);
-		motor4 = new Spark(4);
-		motor5 = new Spark(5);
-		motor6 = new VictorSP(6);
-		mov = new Movimentar(enc, giro, motor0, motor1, motor2, motor3, motor4, motor5, motor6, limit1, limit2);
+		mov = new Movimentar(encoderTracao, encoderSubida, gyroscope, tracao1, tracao2, tracao3, tracao4, subidaEsq, subidaDir, roleteEsq, roleteDir);
 	}
 
 	/**
@@ -56,7 +62,7 @@ public class Robot extends IterativeRobot {
 			if ((counter & 1) == 0) {
 				if (!finalComandAndar) {
 					if (gambi)
-						enc.reset();
+						encoderTracao.reset();
 					finalComandAndar = mov.walkStraight(vars[counter]);
 					gambi = false;
 				} else {
@@ -78,12 +84,12 @@ public class Robot extends IterativeRobot {
 			mov.parar();
 			counter++;
 		} else if (entregar) {
-			if(counter == vars.length + 1) {
-				if (mov.elevateClaw(1.5)) {
+			if(counter == (vars.length + 1)) {
+				if (mov.elevateClaw(2)) {
 					counter++;
 				}
 			}else {
-				if (mov.dropCube()) {
+				if (mov.dropCube(subida)) {
 					counter++;
 				}
 			}	

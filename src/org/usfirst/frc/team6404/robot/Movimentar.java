@@ -16,12 +16,11 @@ public class Movimentar {
 	private ADXRS450_Gyro gyroscope = null;
 	private PIDController pidAngle = null, pidDistance = null;
 	private Encoder encoder = null;
-	private PWMSpeedController motor0, motor1, motor2, motor3, motor4, motor5, motor6;
-	private DigitalInput limit1, limit2;
+	private PWMSpeedController motor0, motor1, motor2, motor3, motor4, motor5, motor6, motor7;
 	private Encoder encSubida;
 	Timer tempo;
-	public Movimentar(Encoder encoder, ADXRS450_Gyro gyroscope, PWMSpeedController motor0, PWMSpeedController motor1,
-			PWMSpeedController motor2, PWMSpeedController motor3,PWMSpeedController motor4,PWMSpeedController motor5,  PWMSpeedController motor6, DigitalInput limit1, DigitalInput limit2) {
+	public Movimentar(Encoder encoder, Encoder encSubida, ADXRS450_Gyro gyroscope, PWMSpeedController motor0, PWMSpeedController motor1,
+			PWMSpeedController motor2, PWMSpeedController motor3,PWMSpeedController motor4,PWMSpeedController motor5,  PWMSpeedController motor6, PWMSpeedController motor7) {
 		this.motor0 = motor0;
 		this.motor1 = motor1;
 		this.motor2 = motor2;
@@ -31,9 +30,7 @@ public class Movimentar {
 		this.gyroscope = gyroscope;
 		this.motor6 = motor6;
 		this.encoder = encoder;
-		this.limit1 = limit1;
-		this.limit2 = limit2;
-		this.encSubida = new EncoderBuilder(0, 1); //Colocar entradas do Encoder depois
+		this.encSubida = encSubida; //Colocar entradas do Encoder depois
 	}
 
 	public boolean walkStraight(int distance) {
@@ -141,19 +138,26 @@ public class Movimentar {
 		this.motor4.free();
 		this.motor5.free();
 		this.motor6.free();
-		this.limit1.free();
-		this.limit2.free();
 	}
 	
-	public boolean dropCube() {
-		if(limit1.get() && !limit2.get()) {
+	public boolean dropCube(double t) {
+		if (tempo != null) {
+			tempo = new Timer();
+			tempo.start();
 			this.motor6.set(0.5);
-			return true;
+			this.motor7.set(0.5);
 		}
-		return true;
+		if (tempo.get() > t) {
+			motor6.set(0);
+			motor7.set(0);
+			tempo = null;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	public boolean elevateClaw(double t) {
+	/*public boolean elevateClaw(double t) {
 		if (tempo != null) {
 			tempo = new Timer();
 			tempo.start();
@@ -163,16 +167,18 @@ public class Movimentar {
 		if (tempo.get() > t) {
 			motor4.set(0);
 			motor5.set(0);
+			tempo = null;
 			return true;
 		} else {
 			return false;
 		}
-	}
+	}*/
 	
 	public boolean elevateClaw(int dist) {
 		if (encSubida.getStopped()) {
+			encSubida.reset();
 			motor4.set(0.5);
-			motor4.set(0.5);
+			motor5.set(0.5);
 		}
 		if (encSubida.get() > dist) {
 			motor4.set(0);
