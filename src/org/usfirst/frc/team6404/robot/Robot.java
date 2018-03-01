@@ -39,9 +39,9 @@ public class Robot extends IterativeRobot {
 		roleteEsq = new Jaguar(8);
 		limit = new DigitalInput(7);
 		encoderSubida = new Encoder(0,1);
-		encoderTracao = new Encoder(1,2);
+		encoderTracao = new Encoder(2,3);
 		gyroscope = new ADXRS450_Gyro();
-
+		control = new Controle(tracao1,tracao2,tracao3,tracao4,limit,subidaEsq,subidaDir,roleteEsq,roleteDir);
 	}
 
 	/**
@@ -101,8 +101,11 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		if(mov != null) mov.free();
-		control = new Controle();
+		if(mov != null) {
+			mov.free();
+			mov= null;
+		}
+		
 	}
 
 	/**
@@ -110,8 +113,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		control.botaoLTeRT();
-		control.botaoLBeRB();
+		control.botoesJoystick2Subida();
+		control.botoesJoystick2GarraBorda();
+		control.botoesJoystick2GarraManual();
 		control.tracao();
 	}
 

@@ -16,41 +16,42 @@ public class Controle {
 	private SpeedControllerGroup motoresFrontais;
 	private SpeedControllerGroup motoresTraseiros;
 	private DigitalInput limit1;
-	protected Joystick controller;
+	protected Joystick controller,controller1;
 	private DifferentialDrive drive;
-	boolean mode;
+	boolean subida;
+	boolean ativo;
 	
-	public Controle() {
-		this.tracao1 = new Spark(0);
-		this.tracao2 = new Spark(1);
-		this.tracao3 = new Spark(2);
-		this.tracao4 = new Spark(3);
-		this.motoresFrontais= new SpeedControllerGroup(tracao1,tracao2);
+	public Controle(PWMSpeedController tracao1,PWMSpeedController tracao2,PWMSpeedController tracao3,PWMSpeedController tracao4,DigitalInput limit1,PWMSpeedController subidaEsquerda,PWMSpeedController subidaDireita,PWMSpeedController roleteEsquerdo, PWMSpeedController roleteDireito) {
+		this.tracao1 = tracao1;
+		this.tracao2 = tracao2;
+		this.tracao3 = tracao3;
+		this.tracao4 = tracao4;
+		this.motoresFrontais= new SpeedControllerGroup(tracao1, tracao2);
 		this.motoresTraseiros= new SpeedControllerGroup(tracao3,tracao4);
-		this.drive= new DifferentialDrive(this.motoresFrontais,this.motoresTraseiros);
-		this.limit1 = new DigitalInput(7);
+		this.drive= new DifferentialDrive(motoresFrontais, motoresTraseiros);
+		this.limit1 = limit1;
+		this.controller1= new Joystick(1);
 		this.controller = new Joystick(0);
-		this.subidaEsq = new Spark(4);
-		this.subidaDir = new Spark(5);
-		this.roleteDir = new VictorSP(7);
-		this.roleteEsq = new Jaguar(8);
+		this.subidaEsq = subidaEsquerda;
+		this.subidaDir = subidaDireita;
+		this.roleteDir = roleteDireito;
+		this.roleteEsq = roleteEsquerdo;
 	}
 	public void tracao() {
-		drive.arcadeDrive(controller.getY(), controller.getX());
+		drive.arcadeDrive(-controller.getY(), controller.getX());
 	}
 	
-	public void botaoLTeRT() {
+	public void botoesJoystick2Subida() {
 
-		if (controller.getRawAxis(2) > 0.2) {
-			subidaEsq.set(controller.getRawAxis(2));
-			subidaDir.set(-controller.getRawAxis(2) * 0.965);
-		} else if (controller.getRawAxis(3) > 0.2) {
-			subidaEsq.set(-controller.getRawAxis(3));
-			subidaDir.set(controller.getRawAxis(3) * 0.965);
+		if (controller1.getRawButton(5) /*&& !limit1.get()*/) {
+			subidaDir.set(0.7);
+			subidaEsq.set(0.7);
+		} else if (controller1.getRawButton(3)) {
+			subidaDir.set(-0.7);
+			subidaEsq.set(-0.7);
 		} else {
-			
-			subidaEsq.set(0);
 			subidaDir.set(0);
+			subidaEsq.set(0);
 		}
 	}
 
@@ -70,13 +71,30 @@ public class Controle {
 		}*/
 	}
 	
-	public void botaoLBeRB() {
-		if (controller.getRawButton(5) /*&& !limit1.get()*/) {
+	public void botoesJoystick2GarraManual() {
+		if (controller1.getRawButton(1) /*&& !limit1.get()*/) {
 			roleteEsq.set(0.7);
 			roleteDir.set(-0.7);
-		} else if (controller.getRawButton(6)) {
+		} else if (controller1.getRawButton(2)) {
 			roleteEsq.set(-0.7);
 			roleteDir.set(0.7);
+		} else {
+			roleteEsq.set(0);
+			roleteDir.set(0);
+		}
+	}
+	
+	public void botoesJoystick2GarraBorda() {
+		if (controller1.getRawButtonPressed(4)) {
+			ativo = (subida)? !ativo: true;
+			subida = true;
+		} else if (controller1.getRawButtonPressed(6)) {
+			ativo = (!subida)? !ativo: true;
+			subida = false;
+		}
+		if (ativo) {
+			roleteEsq.set(subida? 0.7 : -0.7);
+			roleteEsq.set(subida? -0.7 : 0.7);
 		} else {
 			roleteEsq.set(0);
 			roleteDir.set(0);

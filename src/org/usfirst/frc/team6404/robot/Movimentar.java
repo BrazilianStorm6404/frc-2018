@@ -15,21 +15,21 @@ public class Movimentar {
 	private double outputAngle = 0, outputDistance = 0;
 	private ADXRS450_Gyro gyroscope = null;
 	private PIDController pidAngle = null, pidDistance = null;
-	private Encoder encoder = null;
-	private PWMSpeedController motor0, motor1, motor2, motor3, motor4, motor5, motor6, motor7;
+	private Encoder encTracao = null;
+	private PWMSpeedController tracao1, tracao2, tracao3, tracao4, subidaEsq, subidaDir, roleteDir, roleteEsq;
 	private Encoder encSubida;
 	Timer tempo;
 	public Movimentar(Encoder encoder, Encoder encSubida, ADXRS450_Gyro gyroscope, PWMSpeedController motor0, PWMSpeedController motor1,
 			PWMSpeedController motor2, PWMSpeedController motor3,PWMSpeedController motor4,PWMSpeedController motor5,  PWMSpeedController motor6, PWMSpeedController motor7) {
-		this.motor0 = motor0;
-		this.motor1 = motor1;
-		this.motor2 = motor2;
-		this.motor3 = motor3;
-		this.motor4 = motor4;
-		this.motor5 = motor5;
+		this.tracao1 = motor0;
+		this.tracao2 = motor1;
+		this.tracao3 = motor2;
+		this.tracao4 = motor3;
+		this.subidaEsq = motor4;
+		this.subidaDir = motor5;
 		this.gyroscope = gyroscope;
-		this.motor6 = motor6;
-		this.encoder = encoder;
+		this.roleteDir = motor6;
+		this.encTracao = encoder;
 		this.encSubida = encSubida; //Colocar entradas do Encoder depois
 	}
 
@@ -80,17 +80,17 @@ public class Movimentar {
 	}
 
 	private void spin(double speed) {
-		motor0.set(speed);
-		motor1.set(speed);
-		motor2.set(speed);
-		motor3.set(speed);
+		tracao1.set(speed);
+		tracao2.set(speed);
+		tracao3.set(speed);
+		tracao4.set(speed);
 	}
 
 	private void move(double speed) {
-		motor0.set(-speed);
-		motor1.set(-speed);
-		motor2.set(speed);
-		motor3.set(speed);
+		tracao1.set(-speed);
+		tracao2.set(-speed);
+		tracao3.set(speed);
+		tracao4.set(speed);
 	}
 
 	private void verifyA() {
@@ -110,7 +110,7 @@ public class Movimentar {
 
 	private void verifyD() {
 		if (pidDistance == null) {
-			pidDistance = new PIDController(defaultkP, defaultkI, defaultkD, encoder, new PIDOutput() {
+			pidDistance = new PIDController(defaultkP, defaultkI, defaultkD, encTracao, new PIDOutput() {
 				@Override
 				public void pidWrite(double output) {
 					outputDistance = output;
@@ -131,25 +131,32 @@ public class Movimentar {
 	}
 	
 	public void free() {
-		this.motor0.free();
-		this.motor1.free();
-		this.motor2.free();
-		this.motor3.free();
-		this.motor4.free();
-		this.motor5.free();
-		this.motor6.free();
+		this.tracao1.setDisabled();
+		this.tracao2.setDisabled();
+		this.tracao3.setDisabled();
+		this.tracao4.setDisabled();
+		this.subidaEsq.setDisabled();
+		this.subidaDir.setDisabled();
+		this.roleteDir.setDisabled();
+		this.tracao1.free();
+		this.tracao2.free();
+		this.tracao3.free();
+		this.tracao4.free();
+		this.subidaEsq.free();
+		this.subidaDir.free();
+		this.roleteDir.free();
 	}
 	
 	public boolean dropCube(double t) {
 		if (tempo != null) {
 			tempo = new Timer();
 			tempo.start();
-			this.motor6.set(0.5);
-			this.motor7.set(0.5);
+			this.roleteDir.set(0.5);
+			this.roleteEsq.set(0.5);
 		}
 		if (tempo.get() > t) {
-			motor6.set(0);
-			motor7.set(0);
+			roleteDir.set(0);
+			roleteEsq.set(0);
 			tempo = null;
 			return true;
 		} else {
@@ -177,12 +184,12 @@ public class Movimentar {
 	public boolean elevateClaw(int dist) {
 		if (encSubida.getStopped()) {
 			encSubida.reset();
-			motor4.set(0.5);
-			motor5.set(0.5);
+			subidaEsq.set(0.5);
+			subidaDir.set(0.5);
 		}
 		if (encSubida.get() > dist) {
-			motor4.set(0);
-			motor5.set(0);
+			subidaEsq.set(0);
+			subidaDir.set(0);
 			return true;
 		} else {
 			return false;
