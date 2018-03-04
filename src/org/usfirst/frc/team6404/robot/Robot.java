@@ -25,19 +25,20 @@ public class Robot extends IterativeRobot {
 	int counter = 0;
 	Integer[] vars = new Integer[5];
 	String gameData;
-	private PWMSpeedController tracao1,tracao2,tracao3,tracao4, subidaEsq, subidaDir ,roleteEsq, roleteDir;
+	private PWMSpeedController tracao1, tracao2, tracao3, tracao4, subidaEsq, subidaDir, roleteEsq, roleteDir;
 	private DigitalInput limit;
 	private Encoder encoderSubida, encoderTracao;
 	private ADXRS450_Gyro gyroscope;
 	SendableChooser<Integer> posicao;
 	SendableChooser<String> prioridade;
-	SendableChooser<Boolean> colisao;
+	SendableChooser<Boolean> colisao, naoEntregar;
 	String[] gameMode;
 	boolean finalComandAndar, finalComandVirar, gambi, entregar = true, andandoAinda = true, reset = true;;
 	private double subida;
 	int contador = 0;
 	int altura;
 	Integer variaveisAndar[] = new Integer[10];
+
 	@Override
 	public void robotInit() {
 		tracao1 = new Spark(0);
@@ -49,14 +50,15 @@ public class Robot extends IterativeRobot {
 		roleteDir = new VictorSP(7);
 		roleteEsq = new Jaguar(8);
 		limit = new DigitalInput(7);
-		encoderSubida = new Encoder(0,1);
-		encoderTracao = new Encoder(2,3);
+		encoderSubida = new Encoder(0, 1);
+		encoderTracao = new Encoder(2, 3);
 		gyroscope = new ADXRS450_Gyro();
-		control = new Controle(tracao1,tracao2,tracao3,tracao4,limit,subidaEsq,subidaDir,roleteEsq,roleteDir);
+		control = new Controle(tracao1, tracao2, tracao3, tracao4, limit, subidaEsq, subidaDir, roleteEsq, roleteDir);
 		posicao = new SendableChooser<>();
 		prioridade = new SendableChooser<>();
 		colisao = new SendableChooser<>();
-		
+		naoEntregar = new SendableChooser<>();
+
 		posicao.addDefault("Esquerda", 1);
 		posicao.addObject("Centro", 2);
 		posicao.addObject("Direita", 3);
@@ -66,15 +68,19 @@ public class Robot extends IterativeRobot {
 
 		colisao.addDefault("Sim", true);
 		colisao.addObject("Nao", false);
+		naoEntregar.addDefault("Sim", true);
+		naoEntregar.addObject("Nao", false);
 		SmartDashboard.putData("Position", posicao);
 		SmartDashboard.putData("Priority", prioridade);
 		SmartDashboard.putData("Colision", colisao);
+		SmartDashboard.putData("Do not deliver", naoEntregar);
 	}
 
 	/**
 	 * This function is run once each time the robot enters autonomous mode.
 	 */
 	Movimentar mov;
+
 	@Override
 	public void autonomousInit() {
 		mov = new Movimentar(encoderTracao, encoderSubida, gyroscope, tracao1, tracao2, tracao3, tracao4, subidaEsq, subidaDir, roleteEsq, roleteDir);
@@ -94,13 +100,21 @@ public class Robot extends IterativeRobot {
 		gameMode[0] = posicao.getSelected().toString();
 		gameMode[1] = prioridade.getSelected();
 		gameMode[2] = colisao.getSelected().toString();
+		boolean entregar = !naoEntregar.getSelected();
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
 		/*SmartDashboard.putString("1", gameMode[0]);
 		SmartDashboard.putString("2", gameMode[1]);
 		SmartDashboard.putString("3", gameMode[2]);
 		SmartDashboard.putString("gd", gameData); 
 		SmartDashboard.putStringArray("Value", gameMode);*/
-		if ("1".equals(gameMode[0])) {
+		if (!entregar) {
+			 if ("2".equals(gameMode[0])) {
+				 //MEIO
+			 } else {
+				 //ESQUERDA OU DIREITA(Se for necessario colocar TIME ANTES)
+				 
+			 }
+		} else if ("1".equals(gameMode[0])) {
 			if ("sc".equals(gameMode[1]) && 'L' == gameData.charAt(1)) {
 				// reto/vira/reto/vira/reto/vira/reto/coloca (Unico caminho da Scale)
 				variaveisAndar[0] = 780;
@@ -227,11 +241,11 @@ public class Robot extends IterativeRobot {
 					finalComandVirar = false;
 				}
 			}
-		} else if (contador == variaveisAndar.length){
+		} else if (contador == variaveisAndar.length) {
 			if (mov.elevateClaw(altura)) {
 				contador++;
 			}
-		} else if (contador == (variaveisAndar.length + 1)){
+		} else if (contador == (variaveisAndar.length + 1)) {
 			if (mov.dropCube(2)) {
 				contador++;
 			}
@@ -243,20 +257,21 @@ public class Robot extends IterativeRobot {
 	 * This function is called once each time the robot enters teleoperated mode.
 	 */
 	public void configEncoders() {
-		encoderTracao.setMaxPeriod(360/512);
+		encoderTracao.setMaxPeriod(360 / 512);
 		encoderTracao.setMinRate(10);
-		encoderTracao.setDistancePerPulse((Math.PI * 6 * 2.54)/512);
-		encoderSubida.setMaxPeriod(360/512);
+		encoderTracao.setDistancePerPulse((Math.PI * 6 * 2.54) / 512);
+		encoderSubida.setMaxPeriod(360 / 512);
 		encoderSubida.setMinRate(10);
 		encoderSubida.setDistancePerPulse(1);
 	}
+
 	@Override
 	public void teleopInit() {
-		if(mov != null) {
+		if (mov != null) {
 			mov.free();
-			mov= null;
+			mov = null;
 		}
-		
+
 	}
 
 	/**
