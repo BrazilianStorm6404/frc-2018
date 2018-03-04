@@ -18,7 +18,7 @@ public class Controle {
 	private DigitalInput limit1;
 	protected Joystick controller,controller1;
 	private DifferentialDrive drive;
-	boolean subida;
+	boolean abertura;
 	boolean ativo;
 	
 	public Controle(PWMSpeedController tracao1,PWMSpeedController tracao2,PWMSpeedController tracao3,PWMSpeedController tracao4,DigitalInput limit1,PWMSpeedController subidaEsquerda,PWMSpeedController subidaDireita,PWMSpeedController roleteEsquerdo, PWMSpeedController roleteDireito) {
@@ -86,15 +86,15 @@ public class Controle {
 	
 	public void botoesJoystick2GarraBorda() {
 		if (controller1.getRawButtonPressed(4)) {
-			ativo = (subida)? !ativo: true;
-			subida = true;
+			ativo = (abertura)? !ativo: true;
+			abertura = true;
 		} else if (controller1.getRawButtonPressed(6)) {
-			ativo = (!subida)? !ativo: true;
-			subida = false;
+			ativo = (!abertura)? !ativo: true;
+			abertura = false;
 		}
 		if (ativo) {
-			roleteEsq.set(subida? 0.7 : -0.7);
-			roleteEsq.set(subida? -0.7 : 0.7);
+			roleteEsq.set(abertura? 0.7 : -0.7);
+			roleteEsq.set(abertura? -0.7 : 0.7);
 		} else {
 			roleteEsq.set(0);
 			roleteDir.set(0);
