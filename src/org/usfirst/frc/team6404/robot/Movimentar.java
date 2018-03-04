@@ -138,13 +138,6 @@ public class Movimentar {
 		this.subidaEsq.setDisabled();
 		this.subidaDir.setDisabled();
 		this.roleteDir.setDisabled();
-		this.tracao1.free();
-		this.tracao2.free();
-		this.tracao3.free();
-		this.tracao4.free();
-		this.subidaEsq.free();
-		this.subidaDir.free();
-		this.roleteDir.free();
 	}
 	
 	public boolean dropCube(double t) {
@@ -185,7 +178,7 @@ public class Movimentar {
 		if (encSubida.getStopped()) {
 			encSubida.reset();
 			subidaEsq.set(0.5);
-			subidaDir.set(0.5);
+			subidaDir.set(-0.5);
 		}
 		if (encSubida.get() > dist) {
 			subidaEsq.set(0);

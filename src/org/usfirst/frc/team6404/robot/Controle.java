@@ -45,10 +45,10 @@ public class Controle {
 
 		if (controller1.getRawButton(5) /*&& !limit1.get()*/) {
 			subidaDir.set(0.7);
-			subidaEsq.set(0.7);
+			subidaEsq.set(-0.7);
 		} else if (controller1.getRawButton(3)) {
 			subidaDir.set(-0.7);
-			subidaEsq.set(-0.7);
+			subidaEsq.set(0.7);
 		} else {
 			subidaDir.set(0);
 			subidaEsq.set(0);
