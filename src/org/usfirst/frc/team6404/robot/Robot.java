@@ -120,7 +120,7 @@ public class Robot extends IterativeRobot {
 				variaveisAndar[0] = 780;
 				variaveisAndar[1] = 90;
 				variaveisAndar[2] = 111;
-				altura = 180;
+				altura = 200;
 			} else if (gameData.charAt(0) == 'L') {
 				// reto/vira/reto/coloca(caminho mais simples sem desviar na Switch)
 				variaveisAndar[0] = 384;
